@@ -2,7 +2,7 @@ import React from "react";
 import Table from "react-bootstrap/Table";
 
 // A helper function that renders a table from a relation
-export function renderTable(relation) {
+export const renderTable = (relation) => {
   return (
     <Table striped bordered hover>
       <thead>
@@ -23,4 +23,4 @@ export function renderTable(relation) {
       </tbody>
     </Table>
   );
-}
+};
