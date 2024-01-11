@@ -87,7 +87,11 @@ const RelAlgEval = ({
       </Button>
 
       {result && (
-        <Form style={{ margin: "1rem 0" }}>{renderTable(result)}</Form>
+        <Form style={{ margin: "2rem 0" }}>
+          <hr />
+          <Form.Text>{result.name}</Form.Text>
+          {renderTable(result)}
+        </Form>
       )}
     </Container>
   );

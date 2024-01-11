@@ -1,18 +1,38 @@
-import icons from "../lib/icons";
+import { icons } from "../lib/iconsOps";
+import { operations } from "../lib/iconsOps";
 
 export function executeQuery(relations, query) {
-  const parts = query.split(/[()\s]+/);
-  const operation = parts[0];
-  const args = parts.slice(1);
+  const regex = /[()\s]+/;
+  const parts = query.split(regex);
+
+  let operation = "";
+  let args = [];
+
+  for (let part of parts) {
+    if (operations.includes(part) || Object.values(icons).includes(part)) {
+      operation = part;
+    } else if (part !== "") {
+      args.push(part);
+    }
+  }
+
   let result = [];
 
   for (let relation of relations) {
     if (query.includes(relation.name)) {
-      if (operation === "select" || operation === icons.sigma) {
+      if (operation === "") {
+        const relationName = args[0];
+
+        if (relationName === relation.name) {
+          return {
+            name: relation.name,
+            attributes: relation.attributes,
+            tuples: relation.tuples,
+          };
+        }
+      } else if (operation === "select" || operation === icons.sigma) {
         const condition = args[0];
         const relationName = args[1];
-
-        console.log({ condition, relationName });
 
         if (relationName === relation.name) {
           for (let tuple of relation.tuples) {
@@ -50,19 +70,32 @@ export function executeQuery(relations, query) {
           tuples: result,
         };
       } else if (operation === "join" || operation === icons.bowtie) {
-        let relationName1 = args[0];
-        let relationName2 = args[1];
-        const joinCondition = args[2];
+        const joinCondition = args[0];
+        const [attr1, attr2] = joinCondition.split("=");
+
+        let relationName1 = args[1].replace(",", "");
+        let relationName2 = args[2].replace(",", "");
 
         if (
           relationName1 === relation.name ||
           relationName2 === relation.name
         ) {
-          for (let tuple of relation.tuples) {
-            const scope = createScope(relation.attributes, tuple);
+          const otherRelationName =
+            relationName1 === relation.name ? relationName2 : relationName1;
+          const otherRelation = getOtherRelation(otherRelationName, relations);
 
-            if (eval(joinCondition, scope)) {
-              result.push(tuple);
+          for (let tuple1 of relation.tuples) {
+            for (let tuple2 of otherRelation.tuples) {
+              if (tuple1[attr1] === tuple2[attr2]) {
+                const combinedTuple = { ...tuple1, ...tuple2 };
+                const formattedTuple = {};
+
+                for (let key in combinedTuple) {
+                  formattedTuple[key] = combinedTuple[key];
+                }
+
+                result.push(formattedTuple);
+              }
             }
           }
         }
@@ -72,19 +105,105 @@ export function executeQuery(relations, query) {
           attributes: relation.attributes,
           tuples: result,
         };
+      } else if (operation === "rename" || operation === icons.rho) {
+        const newName = args[0];
+        const relationName = args[1];
+
+        if (relationName === relation.name) {
+          return {
+            name: newName,
+            attributes: relation.attributes,
+            tuples: relation.tuples,
+          };
+        }
+      } else if (operation === "union" || operation === icons.union) {
+        let relationName1 = args[0];
+        let relationName2 = args[1];
+
+        if (
+          relationName1 === relation.name ||
+          relationName2 === relation.name
+        ) {
+          const matchingRelation1 = relations.find(
+            (rel) => rel.name === relationName1
+          );
+          const matchingRelation2 = relations.find(
+            (rel) => rel.name === relationName2
+          );
+
+          if (!matchingRelation1 || !matchingRelation2) {
+            break;
+          }
+
+          return {
+            name: relation.name,
+            attributes: matchingRelation1.attributes,
+            tuples: [...matchingRelation1.tuples, ...matchingRelation2.tuples],
+          };
+        }
       } else if (
-        operation === "union" ||
-        operation === icons.union ||
         operation === "intersect" ||
-        operation === icons.intersection ||
-        operation === "minus" ||
-        operation === icons.dash
+        operation === icons.intersection
       ) {
         let relationName1 = args[0];
         let relationName2 = args[1];
 
-        if (relationName1 + operation + relationName2 === relation.name) {
-          return relation;
+        if (
+          relationName1 === relation.name ||
+          relationName2 === relation.name
+        ) {
+          const matchingRelation1 = relations.find(
+            (rel) => rel.name === relationName1
+          );
+          const matchingRelation2 = relations.find(
+            (rel) => rel.name === relationName2
+          );
+
+          if (!matchingRelation1 || !matchingRelation2) {
+            break;
+          }
+
+          const tuples = matchingRelation1.tuples.filter((tuple1) =>
+            matchingRelation2.tuples.some(
+              (tuple2) => JSON.stringify(tuple1) === JSON.stringify(tuple2)
+            )
+          );
+          return {
+            name: relation.name,
+            attributes: matchingRelation1.attributes,
+            tuples,
+          };
+        }
+      } else if (operation === "minus" || operation === icons.dash) {
+        let relationName1 = args[0];
+        let relationName2 = args[1];
+
+        if (
+          relationName1 === relation.name ||
+          relationName2 === relation.name
+        ) {
+          const matchingRelation1 = relations.find(
+            (rel) => rel.name === relationName1
+          );
+          const matchingRelation2 = relations.find(
+            (rel) => rel.name === relationName2
+          );
+
+          if (!matchingRelation1 || !matchingRelation2) {
+            break;
+          }
+
+          const tuples = matchingRelation1.tuples.filter(
+            (tuple1) =>
+              !matchingRelation2.tuples.some(
+                (tuple2) => JSON.stringify(tuple1) === JSON.stringify(tuple2)
+              )
+          );
+          return {
+            name: relation.name,
+            attributes: matchingRelation1.attributes,
+            tuples,
+          };
         }
       } else {
         throw new Error("Invalid operation: " + operation);
@@ -113,4 +232,9 @@ function createProjection(attributes, tuple, selectedAttributes) {
     newTuple[attribute] = tuple[attribute];
   }
   return newTuple;
+}
+
+// Add the following helper function outside of executeQuery
+function getOtherRelation(relationName, relations) {
+  return relations.find((relation) => relation.name === relationName) || {};
 }
