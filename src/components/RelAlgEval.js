@@ -8,9 +8,9 @@ const RelAlgEval = ({
   relations,
   handleRelationChange,
   query,
+  setQuery,
   handleQueryChange,
   handleExecute,
-  handleToolbarClick,
   result,
 }) => {
   const [value, setValue] = React.useState(
@@ -29,6 +29,16 @@ const RelAlgEval = ({
   );
 
   const queryRef = useRef(null);
+
+  const handleToolbarClick = (icon) => {
+    const cursorPosition = queryRef.current.selectionStart;
+
+    console.log(queryRef);
+
+    setQuery(
+      query.slice(0, cursorPosition).concat(icon, query.slice(cursorPosition))
+    );
+  };
 
   return (
     <Container className="App" style={{ marginTop: "3rem" }}>

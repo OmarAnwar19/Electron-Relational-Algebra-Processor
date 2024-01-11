@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { executeQuery } from "./utils/query";
 import RelAlgEval from "./components/RelAlgEval";
 
@@ -25,9 +25,8 @@ const App = () => {
   ];
 
   const [relations, setRelations] = useState(initialRelations);
-  const [query, setQuery] = useState("select tuple.Age>30(Employees)");
+  const [query, setQuery] = useState("select Age>30(Employees)");
   const [result, setResult] = useState(null);
-  const queryRef = useRef(null);
 
   const handleRelationChange = (value) => {
     let relationObjects = [];
@@ -67,22 +66,15 @@ const App = () => {
     setResult(executeQuery(relations, query));
   };
 
-  const handleToolbarClick = (icon) => {
-    const cursorPosition = queryRef.current.selectionStart;
-    setQuery(
-      query.slice(0, cursorPosition).concat(icon, query.slice(cursorPosition))
-    );
-  };
-
   return (
     <RelAlgEval
       initialRelations={initialRelations}
       relations={relations}
       handleRelationChange={handleRelationChange}
       query={query}
+      setQuery={setQuery}
       handleQueryChange={handleQueryChange}
       handleExecute={handleExecute}
-      handleToolbarClick={handleToolbarClick}
       result={result}
     />
   );

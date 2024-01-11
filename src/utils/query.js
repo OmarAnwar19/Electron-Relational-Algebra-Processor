@@ -12,11 +12,13 @@ export function executeQuery(relations, query) {
         const condition = args[0];
         const relationName = args[1];
 
+        console.log({ condition, relationName });
+
         if (relationName === relation.name) {
           for (let tuple of relation.tuples) {
             const scope = createScope(relation.attributes, tuple);
 
-            if (eval(condition, scope)) {
+            if (eval(`tuple.${condition}`, scope)) {
               result.push(tuple);
             }
           }
