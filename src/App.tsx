@@ -4,11 +4,6 @@ import RelAlgEval from "./components/RelAlgEval";
 import { Relation, Tuple } from "./lib/types";
 import { binaryOps } from "./lib/iconsOps";
 
-/*
-  TODO: fix readme / github
-  TODO: record video
-*/
-
 const App = () => {
   const initialRelations: Relation[] = [
     {
