@@ -46,9 +46,10 @@ const RelAlgEval: FC<RelAlgEvalProps> = ({
         <br />
         1. Enter relation(s) in the top text-box.
         <br />
-        2. Enter a query in the bottom text-box (use the operators toolbar).
+        2. Build the query in the bottom text-box using the operators toolbar,
+        or english keywords.
         <br />
-        3. Click the Execute button.
+        3. Click the Execute button to run your query on the relations.
         <br />
       </i>
 
