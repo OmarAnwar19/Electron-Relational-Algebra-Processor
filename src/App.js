@@ -25,7 +25,7 @@ const App = () => {
   ];
 
   const [relations, setRelations] = useState(initialRelations);
-  const [query, setQuery] = useState("select Age>30(Employees)");
+  const [query, setQuery] = useState("π EID,Name (σ Age<30 (Employees))");
   const [result, setResult] = useState(null);
 
   const handleRelationChange = (value) => {
@@ -102,12 +102,21 @@ const App = () => {
   };
 
   const handleExecute = () => {
-    const expressions = extractExpressions(query);
-    const result = executeQuery(relations, query);
+    const tempRelations = [];
+    const expressions = extractExpressions(query).reverse();
 
-    console.log({ expressions, result });
+    for (let i = 0; i < expressions.length; i++) {
+      let expr = expressions[i].replace(expressions[i - 1], `Nested${i - 1}`);
+      const result = executeQuery(i === 0 ? relations : tempRelations, expr);
 
-    setResult(result);
+      tempRelations.push({
+        name: `Nested${i}`,
+        attributes: result.attributes,
+        tuples: result.tuples,
+      });
+    }
+
+    setResult(tempRelations[tempRelations.length - 1]);
   };
 
   return (
