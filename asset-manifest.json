@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/Electron-Relational-Algebra-Processor/static/css/main.241951ba.css",
+    "main.js": "/Electron-Relational-Algebra-Processor/static/js/main.348b5966.js",
+    "index.html": "/Electron-Relational-Algebra-Processor/index.html",
+    "main.241951ba.css.map": "/Electron-Relational-Algebra-Processor/static/css/main.241951ba.css.map",
+    "main.348b5966.js.map": "/Electron-Relational-Algebra-Processor/static/js/main.348b5966.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.241951ba.css",
+    "static/js/main.348b5966.js"
+  ]
+}
