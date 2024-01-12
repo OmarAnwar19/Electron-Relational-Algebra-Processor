@@ -1,4 +1,4 @@
-import React, { CSSProperties, FC } from "react";
+import { CSSProperties, FC } from "react";
 import { Button, ButtonGroup } from "react-bootstrap";
 import { icons } from "../lib/iconsOps"; // import the icons object
 import { ToolbarProps } from "../lib/types";
@@ -23,6 +23,12 @@ const Toolbar: FC<ToolbarProps> = ({ onClick }) => {
       <Button style={buttonStyle} onClick={() => onClick(`${icons.rho}`)}>
         {icons.rho}
       </Button>
+      <Button style={buttonStyle} onClick={() => onClick(`${icons.bowtie}`)}>
+        {icons.bowtie}
+      </Button>
+      <Button style={buttonStyle} onClick={() => onClick(`${icons.cartesian}`)}>
+        {icons.cartesian}
+      </Button>
       <Button
         style={{ padding: "0px 2px 4px 2px", fontSize: "24px" }}
         onClick={() => onClick(`${icons.union}`)}
@@ -34,9 +40,6 @@ const Toolbar: FC<ToolbarProps> = ({ onClick }) => {
         onClick={() => onClick(`${icons.intersection}`)}
       >
         {icons.intersection}
-      </Button>
-      <Button style={buttonStyle} onClick={() => onClick(`${icons.bowtie}`)}>
-        {icons.bowtie}
       </Button>
       <Button style={buttonStyle} onClick={() => onClick(`${icons.minus}`)}>
         {icons.minus}

@@ -69,11 +69,12 @@ export function executeQuery(relations: Relation[], query: string) {
           tuples: result,
         };
       } else if (operation === "join" || operation === icons.bowtie) {
-        const joinCondition = args[0];
-        const [attr1, attr2] = joinCondition.split("=");
+        const joinCondition = args[1];
+        let [attr1, attr2] = joinCondition.split("=");
 
-        let relationName1 = args[1].replace(",", "");
-        let relationName2 = args[2].replace(",", "");
+        let relationName1 = args[0];
+        let relationName2 = args[2];
+        let otherRelation;
 
         if (
           relationName1 === relation.name ||
@@ -81,12 +82,19 @@ export function executeQuery(relations: Relation[], query: string) {
         ) {
           const otherRelationName =
             relationName1 === relation.name ? relationName2 : relationName1;
-          const otherRelation = getOtherRelation(otherRelationName, relations);
+          otherRelation = getOtherRelation(otherRelationName, relations);
+
+          if (!relation.attributes.includes(attr1)) {
+            [attr1, attr2] = [attr2, attr1];
+          }
 
           for (let tuple1 of relation.tuples) {
             for (let tuple2 of otherRelation.tuples) {
               if (tuple1[attr1] === tuple2[attr2]) {
                 const combinedTuple = { ...tuple1, ...tuple2 };
+                delete combinedTuple[attr1];
+                delete combinedTuple[attr2];
+                combinedTuple[`${attr1}_${attr2}`] = tuple1[attr1];
                 result.push(combinedTuple);
               }
             }
@@ -95,7 +103,40 @@ export function executeQuery(relations: Relation[], query: string) {
 
         return {
           name: relation.name,
-          attributes: relation.attributes,
+          attributes: [
+            `${attr1}_${attr2}`,
+            ...relation.attributes.filter((attr) => attr !== attr1),
+            ...(otherRelation?.attributes.filter((attr) => attr !== attr2) ||
+              []),
+          ],
+          tuples: result,
+        };
+      } else if (operation === "cartesian" || operation === icons.cartesian) {
+        let relationName1 = args[0];
+        let relationName2 = args[1];
+        let otherRelation;
+
+        if (
+          relationName1 === relation.name ||
+          relationName2 === relation.name
+        ) {
+          const otherRelationName =
+            relationName1 === relation.name ? relationName2 : relationName1;
+          otherRelation = getOtherRelation(otherRelationName, relations);
+
+          for (let tuple1 of relation.tuples) {
+            for (let tuple2 of otherRelation.tuples) {
+              const combinedTuple = { ...tuple1, ...tuple2 };
+              result.push(combinedTuple);
+            }
+          }
+        }
+        return {
+          name: `${relationName1}_${relationName2}`,
+          attributes: [
+            ...relation.attributes,
+            ...(otherRelation?.attributes || []),
+          ],
           tuples: result,
         };
       } else if (operation === "rename" || operation === icons.rho) {
@@ -129,7 +170,7 @@ export function executeQuery(relations: Relation[], query: string) {
           }
 
           return {
-            name: relation.name,
+            name: `${relationName1}_${relationName2}`,
             attributes: matchingRelation1.attributes,
             tuples: [...matchingRelation1.tuples, ...matchingRelation2.tuples],
           };
@@ -160,12 +201,12 @@ export function executeQuery(relations: Relation[], query: string) {
             matchingRelation2.tuples.some((tuple2) => deepEqual(tuple1, tuple2))
           );
           return {
-            name: relation.name,
+            name: `${relationName1}_${relationName2}`,
             attributes: matchingRelation1.attributes,
             tuples,
           };
         }
-      } else if (operation === "minus" || operation === icons.dash) {
+      } else if (operation === "minus" || operation === icons.minus) {
         let relationName1 = args[0];
         let relationName2 = args[1];
 
@@ -191,7 +232,7 @@ export function executeQuery(relations: Relation[], query: string) {
               )
           );
           return {
-            name: relation.name,
+            name: `${relationName1}_${relationName2}`,
             attributes: matchingRelation1.attributes,
             tuples,
           };

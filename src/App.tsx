@@ -3,6 +3,12 @@ import { executeQuery } from "./utils/query";
 import RelAlgEval from "./components/RelAlgEval";
 import { Relation, Tuple } from "./lib/types";
 
+/*
+  TODO: fix brackets for binary operators
+  TODO: fix readme / github
+  TODO: record video
+*/
+
 const App = () => {
   const initialRelations: Relation[] = [
     {
@@ -16,11 +22,20 @@ const App = () => {
     },
     {
       name: "Documents",
-      attributes: ["ID", "FName"],
+      attributes: ["DID", "DName"],
       tuples: [
-        { ID: 1, FName: "File1" },
-        { ID: 2, FName: "File2" },
-        { ID: 3, FName: "File3" },
+        { DID: 1, DName: "File1" },
+        { DID: 2, DName: "File2" },
+        { DID: 3, DName: "File3" },
+      ],
+    },
+    {
+      name: "Papers",
+      attributes: ["PID", "PName"],
+      tuples: [
+        { PID: 1, PName: "Paper1" },
+        { PID: 2, PName: "Paper2" },
+        { PID: 4, PName: "File3" },
       ],
     },
   ];
@@ -109,15 +124,17 @@ const App = () => {
     const expressions = extractExpressions(query).reverse();
 
     for (let i = 0; i < expressions.length; i++) {
-      let expr = expressions[i].replace(expressions[i - 1], `Nested${i - 1}`);
+      let expr = expressions[i].replace(expressions[i - 1], `Result_${i - 1}`);
       const result = executeQuery(i === 0 ? relations : tempRelations, expr);
 
       tempRelations.push({
-        name: `Nested${i}`,
+        name: `Result_${i}`,
         attributes: result.attributes,
         tuples: result.tuples,
       });
     }
+
+    console.log({ expressions, tempRelations });
 
     setResult(tempRelations[tempRelations.length - 1]);
   };
