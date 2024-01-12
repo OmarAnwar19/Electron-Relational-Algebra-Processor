@@ -131,12 +131,15 @@ export function executeQuery(relations: Relation[], query: string) {
             }
           }
         }
+
+        const combinedAttributes = [
+          ...relation.attributes,
+          ...(otherRelation?.attributes || []),
+        ];
+
         return {
           name: `${relationName1}_${relationName2}`,
-          attributes: [
-            ...relation.attributes,
-            ...(otherRelation?.attributes || []),
-          ],
+          attributes: combinedAttributes,
           tuples: result,
         };
       } else if (operation === "rename" || operation === icons.rho) {
