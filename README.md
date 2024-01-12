@@ -27,7 +27,7 @@ npm install
 
 Live:
 
-- Visit the [Live Project Site]() for a live demonstration of the application.
+- Visit the [Live Site](https://omaranwar19.github.io/Electron-Relational-Algebra-Processor/) for a live demonstration of the application.
 
 Locally:
 
