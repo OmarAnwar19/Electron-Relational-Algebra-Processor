@@ -62,8 +62,52 @@ const App = () => {
     setQuery(e.target.value);
   };
 
+  const extractExpressions = (expression) => {
+    let expressions = [expression];
+    let stack = [];
+    let start = 0;
+
+    for (let i = 0; i < expression.length; i++) {
+      if (expression[i] === "(") {
+        if (stack.length === 0) {
+          start = i;
+        }
+        stack.push("(");
+      } else if (expression[i] === ")") {
+        stack.pop();
+        if (stack.length === 0) {
+          let expr = expression.substring(start + 1, i);
+          if (!expressions.includes(expr)) {
+            expressions.push(expr);
+          }
+        }
+      }
+    }
+
+    // Extract inner expressions from each expression
+    for (let expr of expressions) {
+      let innerStart = expr.indexOf("(");
+      let innerEnd = expr.lastIndexOf(")");
+      const newExpr = expr.substring(innerStart + 1, innerEnd);
+      if (
+        innerStart !== -1 &&
+        innerEnd !== -1 &&
+        !expressions.includes(newExpr)
+      ) {
+        expressions.push(newExpr);
+      }
+    }
+
+    return expressions;
+  };
+
   const handleExecute = () => {
-    setResult(executeQuery(relations, query));
+    const expressions = extractExpressions(query);
+    const result = executeQuery(relations, query);
+
+    console.log({ expressions, result });
+
+    setResult(result);
   };
 
   return (
