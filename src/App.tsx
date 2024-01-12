@@ -2,9 +2,9 @@ import { useState, ChangeEvent } from "react";
 import { executeQuery } from "./utils/query";
 import RelAlgEval from "./components/RelAlgEval";
 import { Relation, Tuple } from "./lib/types";
+import { binaryOps } from "./lib/iconsOps";
 
 /*
-  TODO: fix brackets for binary operators
   TODO: fix readme / github
   TODO: record video
 */
@@ -84,6 +84,7 @@ const App = () => {
     let expressions: string[] = [expression];
     let stack: string[] = [];
     let start = 0;
+    let lastOperatorIndex = -1;
 
     for (let i = 0; i < expression.length; i++) {
       if (expression[i] === "(") {
@@ -98,21 +99,20 @@ const App = () => {
           if (!expressions.includes(expr)) {
             expressions.push(expr);
           }
+          if (lastOperatorIndex !== -1) {
+            let operatorExpr = expression
+              .substring(lastOperatorIndex + 1, i + 1)
+              .trim();
+            if (!expressions.includes(operatorExpr)) {
+              expressions.push(operatorExpr);
+            }
+          }
         }
-      }
-    }
-
-    // Extract inner expressions from each expression
-    for (let expr of expressions) {
-      let innerStart = expr.indexOf("(");
-      let innerEnd = expr.lastIndexOf(")");
-      const newExpr = expr.substring(innerStart + 1, innerEnd);
-      if (
-        innerStart !== -1 &&
-        innerEnd !== -1 &&
-        !expressions.includes(newExpr)
+      } else if (
+        binaryOps.includes(expression[i]) ||
+        Object.values(binaryOps).includes(expression[i])
       ) {
-        expressions.push(newExpr);
+        lastOperatorIndex = i;
       }
     }
 
@@ -120,7 +120,7 @@ const App = () => {
   };
 
   const handleExecute = () => {
-    const tempRelations: Relation[] = [];
+    const tempRelations: Relation[] = [...relations];
     const expressions = extractExpressions(query).reverse();
 
     for (let i = 0; i < expressions.length; i++) {
@@ -128,7 +128,8 @@ const App = () => {
       const result = executeQuery(i === 0 ? relations : tempRelations, expr);
 
       tempRelations.push({
-        name: `Result_${i}`,
+        name:
+          result.name !== "No matching relation" ? `Result_${i}` : result.name,
         attributes: result.attributes,
         tuples: result.tuples,
       });
