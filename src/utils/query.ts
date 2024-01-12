@@ -1,12 +1,13 @@
 import { icons } from "../lib/iconsOps";
 import { operations } from "../lib/iconsOps";
+import { Relation, Tuple } from "../lib/types";
 
-export function executeQuery(relations, query) {
+export function executeQuery(relations: Relation[], query: string) {
   const regex = /[()\s]+/;
   const parts = query.split(regex);
 
   let operation = "";
-  let args = [];
+  let args: string[] = [];
 
   for (let part of parts) {
     if (operations.includes(part) || Object.values(icons).includes(part)) {
@@ -16,7 +17,7 @@ export function executeQuery(relations, query) {
     }
   }
 
-  let result = [];
+  let result: Tuple[] = [];
 
   for (let relation of relations) {
     if (query.includes(relation.name)) {
@@ -36,9 +37,7 @@ export function executeQuery(relations, query) {
 
         if (relationName === relation.name) {
           for (let tuple of relation.tuples) {
-            const scope = createScope(relation.attributes, tuple);
-
-            if (eval(`tuple.${condition}`, scope)) {
+            if (evaluateCondition(condition, tuple)) {
               result.push(tuple);
             }
           }
@@ -88,13 +87,7 @@ export function executeQuery(relations, query) {
             for (let tuple2 of otherRelation.tuples) {
               if (tuple1[attr1] === tuple2[attr2]) {
                 const combinedTuple = { ...tuple1, ...tuple2 };
-                const formattedTuple = {};
-
-                for (let key in combinedTuple) {
-                  formattedTuple[key] = combinedTuple[key];
-                }
-
-                result.push(formattedTuple);
+                result.push(combinedTuple);
               }
             }
           }
@@ -164,9 +157,7 @@ export function executeQuery(relations, query) {
           }
 
           const tuples = matchingRelation1.tuples.filter((tuple1) =>
-            matchingRelation2.tuples.some(
-              (tuple2) => JSON.stringify(tuple1) === JSON.stringify(tuple2)
-            )
+            matchingRelation2.tuples.some((tuple2) => deepEqual(tuple1, tuple2))
           );
           return {
             name: relation.name,
@@ -195,8 +186,8 @@ export function executeQuery(relations, query) {
 
           const tuples = matchingRelation1.tuples.filter(
             (tuple1) =>
-              !matchingRelation2.tuples.some(
-                (tuple2) => JSON.stringify(tuple1) === JSON.stringify(tuple2)
+              !matchingRelation2.tuples.some((tuple2) =>
+                deepEqual(tuple1, tuple2)
               )
           );
           return {
@@ -218,23 +209,37 @@ export function executeQuery(relations, query) {
   };
 }
 
-function createScope(attributes, tuple) {
-  const scope = {};
-  for (let attribute of attributes) {
-    scope[attribute] = tuple[attribute];
-  }
-  return scope;
-}
-
-function createProjection(attributes, tuple, selectedAttributes) {
-  let newTuple = {};
+function createProjection(
+  attributes: string[],
+  tuple: Tuple,
+  selectedAttributes: string[]
+) {
+  let newTuple: { [key: string]: any } = {};
   for (let attribute of selectedAttributes) {
     newTuple[attribute] = tuple[attribute];
   }
   return newTuple;
 }
 
-// Add the following helper function outside of executeQuery
-function getOtherRelation(relationName, relations) {
-  return relations.find((relation) => relation.name === relationName) || {};
+function getOtherRelation(
+  relationName: string,
+  relations: Relation[]
+): Relation {
+  return (
+    relations.find((relation) => relation.name === relationName) || {
+      name: "",
+      attributes: [],
+      tuples: [],
+    }
+  );
+}
+
+function evaluateCondition(condition: string, tuple: Tuple): boolean {
+  // eslint-disable-next-line no-new-func
+  const conditionFunction = new Function("tuple", `return tuple.${condition}`);
+  return conditionFunction(tuple);
+}
+
+function deepEqual(obj1: any, obj2: any) {
+  return JSON.stringify(obj1) === JSON.stringify(obj2);
 }

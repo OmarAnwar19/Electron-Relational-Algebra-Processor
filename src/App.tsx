@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import { useState, ChangeEvent } from "react";
 import { executeQuery } from "./utils/query";
 import RelAlgEval from "./components/RelAlgEval";
+import { Relation, Tuple } from "./lib/types";
 
 const App = () => {
-  const initialRelations = [
+  const initialRelations: Relation[] = [
     {
       name: "Employees",
       attributes: ["EID", "Name", "Age"],
@@ -24,12 +25,14 @@ const App = () => {
     },
   ];
 
-  const [relations, setRelations] = useState(initialRelations);
-  const [query, setQuery] = useState("π EID,Name (σ Age<30 (Employees))");
-  const [result, setResult] = useState(null);
+  const [relations, setRelations] = useState<Relation[]>(initialRelations);
+  const [query, setQuery] = useState<string>(
+    "π EID,Name (σ Age<30 (Employees))"
+  );
+  const [result, setResult] = useState<Relation | null>(null);
 
-  const handleRelationChange = (value) => {
-    let relationObjects = [];
+  const handleRelationChange = (value: string) => {
+    let relationObjects: Relation[] = [];
     const regex = /(\w+)\s*\(([^)]+)\)\s*=\s*\{([^}]*)\}/g;
 
     let match;
@@ -40,11 +43,11 @@ const App = () => {
         .split("\n")
         .map((line) => line.split(",").map((value) => value.trim()));
 
-      let relationObject = {
+      let relationObject: Relation = {
         name: name,
         attributes: attributes,
         tuples: tuples.map((values) => {
-          let tuple = {};
+          let tuple: Tuple = {};
           for (let i = 0; i < attributes.length; i++) {
             tuple[attributes[i]] = values[i];
           }
@@ -58,13 +61,13 @@ const App = () => {
     setRelations(relationObjects);
   };
 
-  const handleQueryChange = (e) => {
+  const handleQueryChange = (e: ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
   };
 
-  const extractExpressions = (expression) => {
-    let expressions = [expression];
-    let stack = [];
+  const extractExpressions = (expression: string): string[] => {
+    let expressions: string[] = [expression];
+    let stack: string[] = [];
     let start = 0;
 
     for (let i = 0; i < expression.length; i++) {
@@ -102,7 +105,7 @@ const App = () => {
   };
 
   const handleExecute = () => {
-    const tempRelations = [];
+    const tempRelations: Relation[] = [];
     const expressions = extractExpressions(query).reverse();
 
     for (let i = 0; i < expressions.length; i++) {

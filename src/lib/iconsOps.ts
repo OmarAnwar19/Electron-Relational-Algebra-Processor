@@ -1,5 +1,4 @@
-// create the icons object
-export const icons = {
+export const icons: { [key: string]: string } = {
   pi: "π",
   sigma: "σ",
   rho: "ρ",
@@ -9,7 +8,7 @@ export const icons = {
   minus: "-",
 };
 
-export const operations = [
+export const operations: string[] = [
   "select",
   "project",
   "rename",

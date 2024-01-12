@@ -1,10 +1,11 @@
-import React from "react";
+import React, { CSSProperties, FC } from "react";
 import { Button, ButtonGroup } from "react-bootstrap";
 import { icons } from "../lib/iconsOps"; // import the icons object
+import { ToolbarProps } from "../lib/types";
 
 // define the type of the Toolbar component
-const Toolbar = ({ onClick }) => {
-  const buttonStyle = {
+const Toolbar: FC<ToolbarProps> = ({ onClick }) => {
+  const buttonStyle: CSSProperties = {
     padding: "8px",
     fontSize: "16px",
     justifyContent: "center",

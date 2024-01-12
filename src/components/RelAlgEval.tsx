@@ -1,9 +1,10 @@
-import React, { useRef } from "react";
+import { useRef, useState, FC } from "react";
 import { Container, Button, Form } from "react-bootstrap";
 import Toolbar from "./Toolbar";
 import { renderTable } from "./Table";
+import { RelAlgEvalProps } from "../lib/types";
 
-const RelAlgEval = ({
+const RelAlgEval: FC<RelAlgEvalProps> = ({
   initialRelations,
   relations,
   handleRelationChange,
@@ -13,7 +14,7 @@ const RelAlgEval = ({
   handleExecute,
   result,
 }) => {
-  const [value, setValue] = React.useState(
+  const [value, setValue] = useState(
     initialRelations
       .map(
         (relation) =>
@@ -28,10 +29,10 @@ const RelAlgEval = ({
       .join("\n\n")
   );
 
-  const queryRef = useRef(null);
+  const queryRef = useRef<HTMLInputElement>(null);
 
-  const handleToolbarClick = (icon) => {
-    const cursorPosition = queryRef.current.selectionStart;
+  const handleToolbarClick = (icon: string) => {
+    const cursorPosition = queryRef.current?.selectionStart || 0;
 
     console.log(queryRef);
 
@@ -90,7 +91,7 @@ const RelAlgEval = ({
         <Form style={{ margin: "2rem 0" }}>
           <hr />
           <Form.Text>{result.name}</Form.Text>
-          {renderTable(result)}
+          {renderTable({ relation: result })}
         </Form>
       )}
     </Container>
