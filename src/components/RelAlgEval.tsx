@@ -33,9 +33,6 @@ const RelAlgEval: FC<RelAlgEvalProps> = ({
 
   const handleToolbarClick = (icon: string) => {
     const cursorPosition = queryRef.current?.selectionStart || 0;
-
-    console.log(queryRef);
-
     setQuery(
       query.slice(0, cursorPosition).concat(icon, query.slice(cursorPosition))
     );

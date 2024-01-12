@@ -135,8 +135,6 @@ const App = () => {
       });
     }
 
-    console.log({ expressions, tempRelations });
-
     setResult(tempRelations[tempRelations.length - 1]);
   };
 
